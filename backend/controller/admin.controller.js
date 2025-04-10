@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-const registerAdmin = async (req, res) => {
+const adminRegister = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -56,15 +56,15 @@ const adminLogin = async (req, res) => {
 
 const adminUpdatePassword = async (req, res) => {
   try {
-    const { currentPassword, newPassword } = req.body;
-    const admin = await Admin.findByPk(req.user.id);
+    const { email, currentPassword, newPassword } = req.body;
+    const admin = await Admin.findOne({ where: { email } });
     if (!admin) {
       return res.status(404).json({ message: "Admin not found" });
     }
 
     const passwordMatch = await bcrypt.compare(currentPassword, admin.password);
     if (!passwordMatch) {
-      return res.status(401).json({ message: "Invalid current password" });
+      return res.status(401).json({ message: "Invalid password" });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -78,3 +78,9 @@ const adminUpdatePassword = async (req, res) => {
   }
 };
 
+
+module.exports = {
+  adminRegister,
+  adminLogin,
+  adminUpdatePassword,
+};
