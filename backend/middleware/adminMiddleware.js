@@ -1,3 +1,4 @@
+const Achievement = require("../models/Achievement");
 const { Leave, OD, Student, Project } = require("../models/index");
 
 const isAdmin = (req, res, next) => {
@@ -10,7 +11,7 @@ const isAdmin = (req, res, next) => {
   }
 
   // If user is authenticated but not an admin
-  if (req.user.role !== "Admin") {
+  if (req.user.role !== "admin" && req.user.role !== "master") {
     return res.status(403).json({
       message: "Access denied. Admin only.",
       currentRole: req.user ? req.user.role : "none",
@@ -19,96 +20,70 @@ const isAdmin = (req, res, next) => {
   next();
 };
 
-const isAdminOrOwnerLeave = async (req, res, next) => {
-  console.log("req.user", req.user);
+const isMaster = (req, res, next) => {
+  // req.user is set by the auth middleware
   if (!req.user) {
-    return res
-      .status(401)
-      .json({ message: "Access denied. Authentication required." });
-  }
-
-  try {
-    const leave = await Leave.findOne({ where: { id: req.params.id } });
-
-    if (!leave) {
-      return res.status(404).json({ message: "Leave not found" });
-    }
-
-    if (req.user.role === "admin" || req.user.id === leave.student_id) {
-      return next();
-    } else {
-      return res.status(403).json({
-        message: "Access denied. Admin or owner only.",
-        currentRole: req.user.role,
-        currentUserId: req.user.id,
-      });
-    }
-  } catch (error) {
-    return res.status(500).json({
-      message: "Error checking leave ownership",
-      error: error.message,
+    return res.status(401).json({
+      message: "Authentication required.",
+      currentRole: "none",
     });
   }
-};
 
-const isAdminOrOwnerOD = async (req, res, next) => {
-  if (!req.user) {
-    return res
-      .status(401)
-      .json({ message: "Access denied. Authentication required." });
-  }
-
-  try {
-    const od = await OD.findOne({ where: { id: req.params.id } });
-
-    if (!od) {
-      return res.status(404).json({ message: "OD not found" });
-    }
-
-    if (req.user.role === "admin" || req.user.id === od.student_id) {
-      return next();
-    } else {
-      return res.status(403).json({
-        message: "Access denied. Admin or owner only.",
-        currentRole: req.user.role,
-        currentUserId: req.user.id,
-      });
-    }
-  } catch (error) {
-    return res.status(500).json({
-      message: "Error checking OD ownership",
-      error: error.message,
+  // If user is authenticated but not an admin
+  if (req.user.role !== "master") {
+    return res.status(403).json({
+      message: "Access denied. Master only.",
+      currentRole: req.user ? req.user.role : "none",
     });
   }
+  next();
 };
-const isAdminOrSelfOD = async (req, res, next) => {
-  if (!req.user) {
-    return res
-      .status(401)
-      .json({ message: "Access denied. Authentication required." });
-  }
 
-  try {
-    if (req.user.role === "Admin" || req.user.id === parseInt(req.params.id, 10)) {
-      return next();
-    } else {
-      return res.status(403).json({
-        message: "Access denied. Admin or owner only.",
-        currentRole: req.user.role,
-        currentUserId: req.user.id,
-      });
-    }
-  } catch (error) {
-    return res.status(500).json({
-      message: "Error checking OD ownership",
-      error: error.message,
+
+const isAdminOrOwner  = async (req, res, next) => {
+  // req.user is set by the auth middleware
+  if (!req.user) {
+    return res.status(401).json({
+      message: "Authentication required.",
+      currentRole: "none",
     });
   }
+  const achievement = await Achievement.findByPk(req.params.id);
+  if (!achievement) {
+    return res.status(404).json({ message: "Achievement not found" });
+  }
+  if (req.user.role !== "admin" && req.user.role !== "master" && req.user.id !== achievement.student_id) {
+    return res.status(403).json({
+      message: "Access denied. Admin or owner only.",
+      currentRole: req.user ? req.user.role : "none",
+    });
+  }
+  
+  next();
 };
+
+const sameDept = async (req, res, next) => {
+  // req.user is set by the auth middleware
+  if (!req.user) {
+    return res.status(401).json({
+      message: "Authentication required.",
+      currentRole: "none",
+    });
+  }
+  if (req.user.role !== "master" && req.user.department !== req.params.department) {
+    return res.status(403).json({
+      message: "Access denied. Admin or owner only.",
+      currentRole: req.user ? req.user.role : "none",
+    });
+  }
+  
+  next();
+};
+
 
 module.exports = {
   isAdmin,
-  isAdminOrOwnerLeave,
-  isAdminOrOwnerOD,
-  isAdminOrSelfOD,
+  isMaster,
+  sameDept,
+  isAdminOrOwner
 };

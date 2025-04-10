@@ -1,8 +1,6 @@
 'use strict';
 
 const { DataTypes } = require("sequelize");
-const sequelize = require("../config/db");
-const Student = require("./Student");
 
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -64,4 +62,5 @@ module.exports = {
     await queryInterface.dropTable('achievements');
   }
 };
+
 

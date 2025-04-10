@@ -62,15 +62,6 @@ const Achievement = sequelize.define(
   }
 );
 
-Achievement.belongsTo(Student, {
-  foreignKey: "student_id",
-  onDelete: "CASCADE",
-});
-
-Student.hasMany(Achievement, {
-  foreignKey: "student_id",
-  onDelete: "CASCADE",
-});
 
 
 

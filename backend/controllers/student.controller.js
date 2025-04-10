@@ -1,6 +1,6 @@
 const { Student } = require("../models");
 
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
@@ -31,6 +31,7 @@ const studentRegister = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const student = await Student.create({
+      reg_no,
       name,
       email,
       password: hashedPassword,
@@ -98,7 +99,16 @@ const studentLogin = async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    res.status(200).json({ message: "Login successful", token });
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: {
+        id: student.id,
+        email: student.email,
+        name: student.name,
+        role: "student",
+      },
+    });
   } catch (error) {
     console.error("Error in student login:", error);
     res.status(500).json({ message: "Internal server error" });

@@ -1,43 +1,58 @@
-'use strict';
+const Student = require("./Student");
+const Admin = require("./Admin");
+const Master = require("./Master");
+const Achievement = require("./Achievement");
+const Log = require("./Log");
 
-const fs = require('fs');
-const path = require('path');
-const Sequelize = require('sequelize');
-const process = require('process');
-const basename = path.basename(__filename);
-const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../config/config.json')[env];
-const db = {};
-
-let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
-} else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
-}
-
-fs
-  .readdirSync(__dirname)
-  .filter(file => {
-    return (
-      file.indexOf('.') !== 0 &&
-      file !== basename &&
-      file.slice(-3) === '.js' &&
-      file.indexOf('.test.js') === -1
-    );
-  })
-  .forEach(file => {
-    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
-    db[model.name] = model;
-  });
-
-Object.keys(db).forEach(modelName => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
-  }
+Achievement.belongsTo(Student, {
+  foreignKey: "student_id",
+  onDelete: "CASCADE",
+  as: "achievementStudent", // 👈 Add alias to avoid conflict
 });
 
-db.sequelize = sequelize;
-db.Sequelize = Sequelize;
+Student.hasMany(Achievement, {
+  foreignKey: "student_id",
+  onDelete: "CASCADE",
+  as: "studentAchievements", // 👈 Add matching alias
+});
 
-module.exports = db;
+// ✅ Define Associations
+
+Log.belongsTo(Student, {
+  foreignKey: "student_id",
+  as: "logStudent", // 👈 Unique alias
+});
+
+Student.hasMany(Log, {
+  foreignKey: "student_id",
+  as: "studentLogs", // 👈 Matching alias
+});
+
+Log.belongsTo(Admin, {
+  foreignKey: "admin_id",
+  as: "logAdmin", // ✅ Changed alias
+});
+
+Admin.hasMany(Log, {
+  foreignKey: "admin_id",
+  as: "adminLogs", // ✅ Matching and unique alias
+});
+
+Achievement.hasMany(Log, {
+  foreignKey: "achievement_id",
+  as: "logs",
+});
+
+Log.belongsTo(Achievement, {
+  foreignKey: "achievement_id",
+  as: "achievement",
+});
+
+module.exports = {
+  Student,
+  Admin,
+  Master,
+  Achievement,
+  Log,
+};
+

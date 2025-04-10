@@ -1,12 +1,12 @@
 const { Admin } = require("../models/index");
 
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const adminRegister = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, department } = req.body;
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -20,7 +20,7 @@ const adminRegister = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const admin = await Admin.create({ name, email, password: hashedPassword });
+    const admin = await Admin.create({ name, email, password: hashedPassword, department });
     res.status(201).json({ message: "Admin registered successfully" });
   } catch (error) {
     console.error("Error in admin registration:", error);
@@ -47,7 +47,16 @@ const adminLogin = async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    res.status(200).json({ message: "Login successful", token });
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: {
+        id: admin.id,
+        email: admin.email,
+        name: admin.name,
+        role: "admin",
+      },
+    });
   } catch (error) {
     console.error("Error in admin login:", error);
     res.status(500).json({ message: "Internal server error" });

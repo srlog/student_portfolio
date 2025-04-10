@@ -66,30 +66,5 @@ const Log = sequelize.define(
   }
 );
 
-// ✅ Define Associations
-
-// A log belongs to a student
-Log.belongsTo(Student, {
-  foreignKey: "student_id",
-  as: "student",
-});
-
-// A log might belong to an admin (placement cell or dept coordinator)
-Log.belongsTo(Admin, {
-  foreignKey: "admin_id",
-  as: "admin",
-});
-Achievement.hasMany(Log, {
-  foreignKey: "achievement_id",
-  as: "logs",
-});
-
-Log.belongsTo(Achievement, {
-  foreignKey: "achievement_id",
-  as: "achievement",
-});
-
-Student.hasMany(Log, { foreignKey: "student_id" });
-Admin.hasMany(Log, { foreignKey: "admin_id" });
 
 module.exports = Log;

@@ -1,12 +1,12 @@
 const { Master } = require("../models");
 
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const masterRegister = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
@@ -26,6 +26,7 @@ const masterRegister = async (req, res) => {
     const master = await Master.create({
       name,
       email,
+      role,
       password: hashedPassword,
     });
     res.status(201).json({ message: "Master registered successfully", master });
@@ -54,7 +55,17 @@ const masterLogin = async (req, res) => {
       { expiresIn: "10d" }
     );
 
-    res.status(200).json({ message: "Login successful", token });
+    res.status(200).json({
+      message: "Login successful",
+      token,
+
+      user: {
+        id: master.id,
+        email: master.email,
+        name: master.name,
+        role: "master",
+      },
+    });
   } catch (error) {
     console.error("Error in Master login:", error);
     res.status(500).json({ message: "Internal server error" });
