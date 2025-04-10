@@ -1,0 +1,22 @@
+{
+  "name": "student_portfolio",
+  "version": "1.0.0",
+  "description": "Student portfolio website for MSEC",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/srlog/msec_hub.git"
+  },
+  "author": "Srinivasan L",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/srlog/msec_hub/issues"
+  },
+  "homepage": "https://github.com/srlog/msec_hub#readme",
+  "dependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

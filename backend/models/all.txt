@@ -1,0 +1,445 @@
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/db");
+const Student = require("./Student");
+
+const Achievement = sequelize.define(
+  "Achievement",
+  {
+    id: {
+      type: DataTypes.BIGINT,
+      primaryKey: true,
+      autoIncrement: true,
+      allowNull: false,
+    },
+    type: {
+      type: DataTypes.ENUM(
+        "certificate",
+        "online_course",
+        "project",
+        "internship",
+        "paper_presentation",
+        "hackathon"
+      ),
+      allowNull: false,
+    },
+    student_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Student,
+        key: "id",
+      },
+      onDelete: "CASCADE",
+    },
+    title: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    specialization: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    issued_by: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    issued_date: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    approved_by_department: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    approved_by_placement: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+  },
+  {
+    tableName: "achievements",
+    timestamps: false,
+  }
+);
+
+Achievement.belongsTo(Student, {
+  foreignKey: "student_id",
+  onDelete: "CASCADE",
+});
+
+Student.hasMany(Achievement, {
+  foreignKey: "student_id",
+  onDelete: "CASCADE",
+});
+
+
+
+module.exports = Achievement;
+
+
+// models/Admin.js
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/db");
+
+// Define the "Admin" model to represent teachers/HODs with authority over student entries
+const Admin = sequelize.define(
+  "Admin",
+  {
+    // Unique identifier for admin
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+      allowNull: false,
+    },
+    // Admin's full name
+    name: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    // Admin's email must be unique
+    email: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+      unique: true,
+    },
+    // Password field (store hashed values)
+    password: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    // Optional: department for which the admin is responsible
+    department: {
+      type: DataTypes.ENUM("AI&DS", "CSE", "CIVIL", "EEE", "ECE", "IT", "MECH"),
+      allowNull: true,
+    },
+  },
+  {
+    tableName: "admins",   // Database table name for admins
+    timestamps: true,      
+    createdAt: "created_at",
+    updatedAt: "updated_at",
+  }
+);
+
+module.exports = Admin;
+
+
+import os
+
+with open("all.txt", "w") as f:
+    for filename in os.listdir("."):
+        if os.path.isfile(filename):
+            with open(filename, "r") as file:
+                f.write(file.read() + "\n")
+
+'use strict';
+
+const fs = require('fs');
+const path = require('path');
+const Sequelize = require('sequelize');
+const process = require('process');
+const basename = path.basename(__filename);
+const env = process.env.NODE_ENV || 'development';
+const config = require(__dirname + '/../config/config.json')[env];
+const db = {};
+
+let sequelize;
+if (config.use_env_variable) {
+  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+} else {
+  sequelize = new Sequelize(config.database, config.username, config.password, config);
+}
+
+fs
+  .readdirSync(__dirname)
+  .filter(file => {
+    return (
+      file.indexOf('.') !== 0 &&
+      file !== basename &&
+      file.slice(-3) === '.js' &&
+      file.indexOf('.test.js') === -1
+    );
+  })
+  .forEach(file => {
+    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
+    db[model.name] = model;
+  });
+
+Object.keys(db).forEach(modelName => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
+});
+
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
+
+module.exports = db;
+
+// models/Log.js
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/db");
+const Student = require("./Student"); // assumes you have this
+const Admin = require("./Admin"); // make sure this model exists or create it
+const Achievement = require("./Achievement"); // assuming you have this
+
+const Log = sequelize.define(
+  "Log",
+  {
+    id: {
+      type: DataTypes.BIGINT,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    approved_by: {
+      type: DataTypes.ENUM("placement", "department"),
+      allowNull: true,
+    },
+    type: {
+      type: DataTypes.ENUM(
+        "certificate",
+        "online_course",
+        "project",
+        "internship",
+        "paper_presentation",
+        "hackathon"
+      ),
+      allowNull: true,
+    },
+    admin_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "admins", // table name (or Admin if you’ve imported it)
+        key: "id",
+      },
+      onDelete: "SET NULL",
+    },
+    student_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "students", // same as your Student table
+        key: "id",
+      },
+      onDelete: "CASCADE",
+    },
+    achievement_id: {
+      type: DataTypes.BIGINT,
+      allowNull: true,
+      references: {
+        model: "achievements", // assuming you have this table
+        key: "id",
+      },
+      onDelete: "CASCADE",
+    },
+    timestamp: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+  },
+  {
+    tableName: "logs",
+    timestamps: false,
+  }
+);
+
+// ✅ Define Associations
+
+// A log belongs to a student
+Log.belongsTo(Student, {
+  foreignKey: "student_id",
+  as: "student",
+});
+
+// A log might belong to an admin (placement cell or dept coordinator)
+Log.belongsTo(Admin, {
+  foreignKey: "admin_id",
+  as: "admin",
+});
+Achievement.hasMany(Log, {
+  foreignKey: "achievement_id",
+  as: "logs",
+});
+
+Log.belongsTo(Achievement, {
+  foreignKey: "achievement_id",
+  as: "achievement",
+});
+
+Student.hasMany(Log, { foreignKey: "student_id" });
+Admin.hasMany(Log, { foreignKey: "admin_id" });
+
+module.exports = Log;
+
+// models/Master.js
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/db");
+
+// Define the "Master" model to represent higher-level authority (e.g., secretaries and principals)
+const Master = sequelize.define(
+  "Master",
+  {
+    // Unique identifier for master-level users
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+      allowNull: false,
+    },
+    // Full name field
+    name: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    // Email should be unique in the system
+    email: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+      unique: true,
+    },
+    // Password field (store a hashed password)
+    password: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    // Role within the master category: could be 'secretary' or 'principal'
+    role: {
+      type: DataTypes.ENUM("secretary", "principal"),
+      allowNull: false,
+    },
+  },
+  {
+    tableName: "masters",  // Database table name for master users
+    timestamps: true,
+    createdAt: "created_at",
+    updatedAt: "updated_at",
+  }
+);
+
+module.exports = Master;
+
+// models/Student.js
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/db"); // Your database connection
+
+// Define the "Student" model with fields including personal details and additional academic fields
+const Student = sequelize.define(
+  "Student",
+  {
+    // Primary key for internal use (auto-incrementing integer)
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+      allowNull: false,
+    },
+    // Registration number; unique string identifier for each student
+    reg_no: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+      unique: true,
+    },
+    // Student's full name
+    name: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    // Gender using an ENUM type
+    gender: {
+      type: DataTypes.ENUM("male", "female", "other"),
+      allowNull: true,
+    },
+    // Father's name
+    fathers_name: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    // Date of Birth (using DATEONLY to store only the date)
+    date_of_birth: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+    // Residential address as text
+    residential_address: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    // Email address; must be unique for login purposes
+    email: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+      unique: true,
+    },
+    // Mobile number field
+    mobile: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
+    // Parents’ mobile number field
+    parents_mobile_no: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
+    // Aadhar Card number or any other government identifier
+    aadhar_card_no: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
+    // Hashed password for authentication
+    password: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    // Academic department using an ENUM of available departments
+    department: {
+      type: DataTypes.ENUM("AI&DS", "CSE", "CIVIL", "EEE", "ECE", "IT", "MECH"),
+      allowNull: true,
+    },
+    // Academic year as an ENUM (I, II, III, IV)
+    year: {
+      type: DataTypes.ENUM("I", "II", "III", "IV"),
+      allowNull: true,
+    },
+    // Section information
+    section: {
+      type: DataTypes.ENUM("A", "B", "Not Applicable"),
+      allowNull: true,
+    },
+    // Cumulative Grade Point Average
+    cgpa: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+    // Short biography for the student
+    bio: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    // URL to the profile picture
+    profile_picture: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    // Flag for account verification
+    is_verified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    // Token for verifying email or other operations (if needed)
+    verification_token: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+  },
+  {
+    tableName: "students",   // Explicit table name in the database
+    timestamps: true,        // Automatically add created_at and updated_at timestamps
+    createdAt: "created_at", // Custom field name for creation timestamp
+    updatedAt: "updated_at", // Custom field name for update timestamp
+  }
+);
+
+module.exports = Student;
+
