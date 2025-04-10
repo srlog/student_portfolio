@@ -31,7 +31,7 @@ const Master = sequelize.define(
     },
     // Role within the master category: could be 'secretary' or 'principal'
     role: {
-      type: DataTypes.ENUM("secretary", "principal"),
+      type: DataTypes.ENUM("secretary", "principal", "placement_officer"),
       allowNull: false,
     },
   },

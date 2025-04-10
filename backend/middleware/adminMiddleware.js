@@ -1,4 +1,4 @@
-const { Leave, OD, Student, Project } = require("../models/Index");
+const { Leave, OD, Student, Project } = require("../models/index");
 
 const isAdmin = (req, res, next) => {
   // req.user is set by the auth middleware
