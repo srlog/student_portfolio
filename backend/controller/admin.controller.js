@@ -42,7 +42,7 @@ const adminLogin = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: admin.id, email: admin.email, role: "admin" },
+      { id: admin.id, name: admin.name, email: admin.email, role: "admin" },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
@@ -77,7 +77,6 @@ const adminUpdatePassword = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 module.exports = {
   adminRegister,
