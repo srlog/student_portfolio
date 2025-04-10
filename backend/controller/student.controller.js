@@ -49,14 +49,14 @@ const studentBulkCreate = async (req, res) => {
     const { students } = req.body;
 
     const requiredFields = ["reg_no", "name", "email", "password"];
-    const invalidStudents = students.filter(
-      (student) =>
-        requiredFields.some((field) => !(field in student))
+    const invalidStudents = students.filter((student) =>
+      requiredFields.some((field) => !(field in student))
     );
 
     if (invalidStudents.length > 0) {
       return res.status(400).json({
-        message: "All students must have the following fields: reg_no, name, email, password",
+        message:
+          "All students must have the following fields: reg_no, name, email, password",
       });
     }
 
@@ -103,4 +103,34 @@ const studentLogin = async (req, res) => {
     console.error("Error in student login:", error);
     res.status(500).json({ message: "Internal server error" });
   }
+};
+
+const studentUpdatePassword = async (req, res) => {
+  try {
+    const { email, oldPassword, newPassword } = req.body;
+    const student = await Student.findOne({ where: { email } });
+    if (!student) {
+      return res.status(401).json({ message: "Invalid email, user not found" });
+    }
+
+    const passwordMatch = await bcrypt.compare(oldPassword, student.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    student.password = hashedPassword;
+    await student.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error in student update password:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports = {
+  studentRegister,
+  studentBulkCreate,
+  studentLogin,
 };
