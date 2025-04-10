@@ -56,3 +56,28 @@ const adminLogin = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 }
+
+
+const AdminUpdatePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const admin = await Admin.findByPk(req.user.id);
+        if (!admin) {
+            return res.status(404).json({ message: "Admin not found" });
+        }
+
+        const passwordMatch = await bcrypt.compare(currentPassword, admin.password);
+        if (!passwordMatch) {    
+            return res.status(401).json({ message: "Invalid current password" });
+        }    
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        admin.password = hashedPassword;
+        await admin.save(); 
+
+        res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+        console.error("Error in admin password update:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
