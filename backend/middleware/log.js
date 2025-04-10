@@ -1,5 +1,5 @@
 // middleware/log.js
-const Log = require("../models/Log");
+const { Log } = require("../models");
 
 const log = (action, targetType = null) => {
   return async (req, res, next) => {
@@ -13,6 +13,7 @@ const log = (action, targetType = null) => {
             target_id: req.body?.id || null,
             target_type: targetType,
             description: `Action '${action}' performed by user ${req.user?.id || "unknown"}`,
+            timestamp: new Date(),
           });
         } catch (err) {
           console.error("Log middleware error:", err);
@@ -25,3 +26,4 @@ const log = (action, targetType = null) => {
 };
 
 module.exports = log;
+
