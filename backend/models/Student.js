@@ -118,5 +118,5 @@ const Student = sequelize.define(
     updatedAt: "updated_at", // Custom field name for update timestamp
   }
 );
-
+  
 module.exports = Student;

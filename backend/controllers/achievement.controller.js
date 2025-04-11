@@ -1,7 +1,5 @@
 const { Achievement, Student, Admin } = require("../models");
 
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const createAchievement = async (req, res) => {
@@ -227,9 +225,12 @@ const getAcheivementById = async (req, res) => {
   }
 };
 
-const getAcheivementByStudentId = async (req, res) => {
+const getAcheivementByStudentId = async (req, res, call= false, student_id) => {
   try {
     const { student_id } = req.params;
+    if (call) {
+      student_id = req.user.id;
+    }
     const achievements = await Achievement.findAll({
       where: { student_id },
     });
@@ -238,12 +239,17 @@ const getAcheivementByStudentId = async (req, res) => {
     }
 
     const organizedAchievements = organizeAchievementsStudent(achievements);
+    if (call) {
+      return organizedAchievements;
+    }
     res.status(200).json({ achievements: organizedAchievements });
   } catch (error) {
     console.error("Error in fetching achievements:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
 
 const getAchievementsByDepartment = async (req, res) => {
   try {
@@ -366,4 +372,5 @@ module.exports = {
   getAchievementsByYear,
   getAchievementsByClass,
   getAllAchievements,
+  organizeAchievementsStudent
 };

@@ -7,6 +7,7 @@ const studentRoutes = require("./routes/student.routes");
 const adminRoutes = require("./routes/admin.routes");
 const masterRoutes = require("./routes/master.routes");
 const achievementRoutes = require("./routes/achievement.routes");
+const profileRoutes = require("./routes/profile.routes");
 
 const { Student, Admin, Master, Achievement, Log } = require("./models");
 async function syncDb() {
@@ -29,6 +30,7 @@ app.use("/api/auth/student", studentRoutes);
 app.use("/api/auth/admin", adminRoutes);
 app.use("/api/auth/master", masterRoutes);
 app.use("/api/achievement", achievementRoutes);
+app.use("/api/profile", profileRoutes);
 
 
 // Commented so that, no re-init occurs for database while reload

@@ -1,0 +1,130 @@
+const express = require("express");
+const achievementController = require("../controllers/achievement.controller");
+
+const auth = require("../middleware/authMiddleware");
+const {
+  isAdmin,
+  isMaster,
+  sameDept,
+  isAdminOrOwner,
+} = require("../middleware/adminMiddleware");
+const log = require("../middleware/log");
+
+const router = express.Router();
+
+router.post("/create", auth, achievementController.createAchievement);
+router.put(
+  "/update/:id",
+  auth,
+  isAdminOrOwner,
+  achievementController.updateAchievement
+);
+
+router.delete(
+  "/delete/:id",
+  auth,
+  isAdminOrOwner,
+  achievementController.deleteAchievement
+);
+router.patch(
+  "/approve/:id",
+  auth,
+  isAdmin,
+  achievementController.approveAchievement
+);
+router.get(
+  "/get/:id",
+  auth,
+  isAdminOrOwner,
+  achievementController.getAcheivementById
+);
+router.get(
+  "/get/student/:student_id",
+  auth,
+  isAdmin,
+  achievementController.getAcheivementByStudentId
+);
+router.get(
+  "/get/department/:department",
+  auth,
+  isAdmin,
+  sameDept,
+  achievementController.getAchievementsByDepartment
+);
+
+router.get(
+  "/get/year/:year",
+  auth,
+  isMaster,
+  achievementController.getAchievementsByYear
+);
+router.get(
+  "/get/class/:department/:year",
+  auth,
+  isMaster,
+  achievementController.getAchievementsByClass
+);
+router.get("/getAll",auth, isMaster, achievementController.getAllAchievements);
+
+module.exports = router;
+
+const express = require("express");
+const adminController = require("../controllers/admin.controller");
+
+const router = express.Router();
+
+router.post("/register", adminController.adminRegister);
+router.post("/login", adminController.adminLogin);
+router.put("/update-password", adminController.adminUpdatePassword);
+
+module.exports = router;
+
+import os
+
+with open("all.txt", "w") as f:
+    for filename in os.listdir("."):
+        if os.path.isfile(filename):
+            with open(filename, "r") as file:
+                f.write(file.read() + "\n")
+
+const express = require("express");
+const masterController = require("../controllers/master.controller");
+
+const router = express.Router();
+
+router.post("/register", masterController.masterRegister);
+router.post("/login", masterController.masterLogin);
+router.put("/update-password", masterController.masterUpdatePassword);
+
+module.exports = router;
+const express = require("express");
+const profileController = require("../controllers/profile.controller");
+const auth = require("../middleware/authMiddleware");
+const { isAdmin, isMaster } = require("../middleware/adminMiddleware");
+
+
+const router = express.Router();
+
+router.get("/student",auth, profileController.getStudentProfile);
+router.get("/admin/student/:id", auth, isAdmin, profileController.getStudentProfileAdmin);
+router.get("/admin/", auth, isAdmin, profileController.getAdminProfile);
+
+router.put('/student', auth, profileController.updateStudentProfile)
+router.put('/admin', auth, isAdmin, profileController.updateAdminProfile)
+
+
+module.exports = router;
+const express = require("express");
+const studentController = require("../controllers/student.controller");
+
+
+const router = express.Router();
+
+
+router.post("/register", studentController.studentRegister);
+router.post("/bulk-register", studentController.studentBulkCreate);
+router.post("/login", studentController.studentLogin);
+router.put("/update-password", studentController.studentUpdatePassword);
+
+module.exports = router;
+

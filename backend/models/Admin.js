@@ -36,8 +36,8 @@ const Admin = sequelize.define(
     },
   },
   {
-    tableName: "admins",   // Database table name for admins
-    timestamps: true,      
+    tableName: "admins", // Database table name for admins
+    timestamps: true,
     createdAt: "created_at",
     updatedAt: "updated_at",
   }
