@@ -54,6 +54,7 @@ const adminLogin = async (req, res) => {
         id: admin.id,
         email: admin.email,
         name: admin.name,
+        department: admin.department,
         role: "admin",
       },
     });
@@ -83,6 +84,25 @@ const adminUpdatePassword = async (req, res) => {
     res.status(200).json({ message: "Password updated successfully" });
   } catch (error) {
     console.error("Error in admin password update:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// This should be connected with the routes and frontend.. 
+const getStudentsByDepartment = async (req, res) => {
+  try {
+    const { department } = req.user.department;
+    const students = await Student.findAll({
+      where: {
+        department,
+      },
+    });
+    if (!students || students.length === 0) {
+      return res.status(404).json({ message: "Students not found" });
+    }
+    res.status(200).json({ students });
+  } catch (error) {
+    console.error("Error in fetching students by department:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

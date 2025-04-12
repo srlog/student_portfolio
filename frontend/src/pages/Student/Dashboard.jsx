@@ -14,6 +14,7 @@ function Dashboard() {
       { id: 3, title: 'Research Paper Publication', date: '2024-03-05', type: 'Academic' },
     ]
   });
+  const user = JSON.parse(localStorage.getItem('user'))
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -23,7 +24,7 @@ function Dashboard() {
           <div className="flex items-center space-x-4">
             <FiBook className="h-12 w-12" />
             <div>
-              <h1 className="text-3xl font-bold">Welcome to MSEC</h1>
+              <h1 className="text-3xl font-bold">Hello {user.name}! Welcome to MSEC</h1>
               <p className="mt-2 text-primary-100">Track your academic journey and achievements</p>
             </div>
           </div>
