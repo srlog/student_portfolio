@@ -76,6 +76,18 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: true
       },
+      portfolio: {
+        type: Sequelize.STRING(255),
+        allowNull: true
+      },
+      github_profile: {
+        type: Sequelize.STRING(255),
+        allowNull: true
+      },
+      linkedin_profile: {
+        type: Sequelize.STRING(255),
+        allowNull: true
+      },
       profile_picture: {
         type: Sequelize.STRING(255),
         allowNull: true

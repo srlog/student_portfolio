@@ -63,11 +63,11 @@ const getAdminProfile = async (req, res) => {
   }
 };
 
-
 const updateStudentProfile = async (req, res) => {
   try {
     const id = req.user.id;
     const {
+      name,
       gender,
       fathers_name,
       date_of_birth,
@@ -80,6 +80,9 @@ const updateStudentProfile = async (req, res) => {
       section,
       cgpa,
       bio,
+      portfolio,
+      github_profile,
+      linkedin_profile,
       profile_picture,
     } = req.body;
 
@@ -88,7 +91,7 @@ const updateStudentProfile = async (req, res) => {
         id,
       },
     });
-
+    student.name = name;
     student.gender = gender;
     student.fathers_name = fathers_name;
     student.date_of_birth = date_of_birth;
@@ -101,6 +104,9 @@ const updateStudentProfile = async (req, res) => {
     student.section = section;
     student.cgpa = cgpa;
     student.bio = bio;
+    student.portfolio = portfolio;
+    student.github_profile = github_profile;
+    student.linkedin_profile = linkedin_profile;
     student.profile_picture = profile_picture;
 
     await student.save();
@@ -111,15 +117,13 @@ const updateStudentProfile = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
-
   }
 };
 
 const updateAdminProfile = async (req, res) => {
   try {
     const id = req.user.id;
-    const {department
-    } = req.body;
+    const { department } = req.body;
 
     const admin = await Admin.findOne({
       where: {
@@ -133,18 +137,15 @@ const updateAdminProfile = async (req, res) => {
       message: "Admin profile updated successfully",
     });
   } catch (error) {
-    console.error({message: "Error updating admin profile: " ,error});
+    console.error({ message: "Error updating admin profile: ", error });
     res.status(500).json({ error: "Internal server error" });
-
   }
-}
-
-
+};
 
 module.exports = {
   getStudentProfile,
   getStudentProfileAdmin,
-  getAdminProfile, 
+  getAdminProfile,
   updateStudentProfile,
-  updateAdminProfile
+  updateAdminProfile,
 };

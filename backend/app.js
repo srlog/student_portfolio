@@ -33,7 +33,7 @@ app.use("/api/achievement", achievementRoutes);
 app.use("/api/profile", profileRoutes);
 
 
-// Commented so that, no re-init occurs for database while reload
+// // Commented so that, no re-init occurs for database while reload
 // console.log('Syncing database...')
 // syncDb().then(() => {
 //   app.listen(process.env.PORT, () => {

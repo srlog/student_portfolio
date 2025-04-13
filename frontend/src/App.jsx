@@ -6,7 +6,6 @@ import Register from './pages/Auth/Register';
 import StudentDashboard from './pages/Student/Dashboard';
 import StudentProfile from './pages/Student/Profile';
 import Achievements from './pages/Student/Achievements';
-import AchievementForm from './pages/Student/AchievementForm';
 
 // Admin Routes
 import AdminDashboard from './pages/Admin/Dashboard';
@@ -36,8 +35,6 @@ function App() {
           <Route path="/student/dashboard" element={<StudentDashboard />} />
           <Route path="/student/profile" element={<StudentProfile />} />
           <Route path="/student/achievements" element={<Achievements />} />
-          <Route path="/student/achievements/new" element={<AchievementForm />} />
-          <Route path="/student/achievements/edit/:id" element={<AchievementForm />} />
 
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />

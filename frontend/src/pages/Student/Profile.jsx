@@ -12,12 +12,55 @@ import {
   EnvelopeIcon,
   PhoneIcon,
 } from "@heroicons/react/24/outline";
-import { FiAward, FiUser, FiBell  } from "react-icons/fi";
+import { FaLinkedin, FaGithub, FaGit } from 'react-icons/fa';
+import { FiAward, FiUser, FiBell } from "react-icons/fi";
+
+// Import your modal forms
+import { ConfirmPassword, EditProfile } from "./EditProfile";
+import ProfileHeader from "./ProfileHeader";
+import StatsSection from "./StatsSection";
+
+// A reusable Modal component
+const Modal = ({ isOpen, onClose, children }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-lg p-6">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-6 h-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+        <div className="mt-2">{children}</div>
+      </div>
+    </div>
+  );
+};
+
+
 function Profile() {
   // Set a default for achievements so it never is undefined.
   const [profile, setProfile] = useState({ achievements: {} });
   const [activeTab, setActiveTab] = useState("achievements");
   const [loading, setLoading] = useState(true);
+
+  // Modal states
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+  const [showUpdatePasswordModal, setShowUpdatePasswordModal] = useState(false);
 
   // Calculate profile completion as percentage of mandatory fields present.
   const calculateProfileCompletion = () => {
@@ -46,6 +89,7 @@ function Profile() {
         const response = await studentAPI.getProfile();
         // Ensure achievements is present. If not, fallback to an empty object.
         const data = { ...response.data.student };
+        console
         setProfile(data);
       } catch (error) {
         toast.error("Failed to fetch profile");
@@ -54,6 +98,7 @@ function Profile() {
       }
     };
     fetchProfile();
+    
   }, []);
 
   if (loading) {
@@ -66,21 +111,34 @@ function Profile() {
 
   const socialLinks = [
     {
-      icon: <GlobeAltIcon className="h-5 w-5" />,
-      label: "Portfolio",
-      url: "#",
-    },
-    {
+      isPresent: !!profile.email,
       icon: <EnvelopeIcon className="h-5 w-5" />,
-      label: "Email",
+      label: profile.email,
       url: `mailto:${profile.email}`,
     },
     {
+      isPresent: !!profile.mobile,
       icon: <PhoneIcon className="h-5 w-5" />,
-      label: "Phone",
+      label: profile.mobile,
       url: `tel:${profile.mobile}`,
+    },  {
+      isPresent: !!profile.portfolio,
+      icon: <GlobeAltIcon className="h-5 w-5" />,
+      url: profile.portfolio,
     },
+    {
+      isPresent: !!profile.github_profile,
+      icon: <FaGithub className="h-5 w-5" />,
+      url: profile.github_profile,
+    },
+    {
+      isPresent: !!profile.linkedin_profile,
+      icon: <FaLinkedin className="h-5 w-5" />,
+      url: profile.linkedin_profile,
+    },
+  
   ];
+
 
   const renderAchievements = (category) => (
     <div className="mt-6" key={category}>
@@ -133,161 +191,13 @@ function Profile() {
     <div className="min-h-screen bg-gray-50">
       <Navbar role="student" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Profile Header */}
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-blue-800 via-blue-600 to-blue-500 p-10 mb-12 shadow-xl">
-          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
-          <div className="relative flex flex-col md:flex-row items-center gap-10">
-            <img
-              src={profile.profile_picture}
-              alt={profile.name}
-              className="h-48 w-48 rounded-full border-4 border-white shadow-xl object-cover"
-            />
-            <div className="flex-1 text-center md:text-left">
-              <h1 className="text-5xl font-extrabold text-white mb-2 drop-shadow">
-                {profile.name}
-              </h1>
-              <div className="flex items-center justify-center md:justify-start gap-2 text-white/90 mb-4 text-sm">
-                <span className="font-medium">{profile.reg_no}</span>
-                <span>•</span>
-                <span className="font-medium">
-                  {profile.department} - {profile.year} Year
-                </span>
-              </div>
-              <div className="flex items-center justify-center md:justify-start gap-6">
-                {socialLinks.map((link, i) => (
-                  <a
-                    key={i}
-                    href={link.url}
-                    className="flex items-center gap-2 text-white hover:text-white/90 text-sm transition-colors"
-                  >
-                    {link.icon}
-                    <span>{link.label}</span>
-                  </a>
-                ))}
-              </div>
-            </div>
-            <div className="w-28">
-              <CircularProgressbar
-                value={profile.cgpa * 10}
-                text={`${profile.cgpa}`}
-                styles={buildStyles({
-                  textColor: "white",
-                  pathColor: "#00FFD1",
-                  trailColor: "rgba(255,255,255,0.2)",
-                })}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Biography */}
-        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800">
-            Biography
-          </h2>
-          <div className="prose prose-sm text-gray-700">
-            <ReactMarkdown>{profile.bio}</ReactMarkdown>
-          </div>
-        </div>
-
-        {/* Stats Section */}
-        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 mt-6 space-y-6">
-          {/* Row One: 3 Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Total Achievements */}
-            <div className="p-6 hover:border-primary-500 transition-colors border border-gray-200 rounded-xl">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-indigo-100 rounded-lg">
-                  <FiAward className="h-6 w-6 text-indigo-600" />
-                </div>
-                <span className="text-sm font-medium text-gray-500">
-                  Total Achievements
-                </span>
-              </div>
-              <div className="flex items-end justify-between">
-                <h3 className="text-3xl font-bold text-gray-900">
-                  {profile.achievements.total_achievements || 0}
-                </h3>
-                <span className="text-green-500 text-sm font-medium">
-                  +2 this month
-                </span>
-              </div>
-            </div>
-
-            {/* Profile Completion */}
-            <div className="p-6 hover:border-green-500 transition-colors border border-gray-200 rounded-xl">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-green-100 rounded-lg">
-                  <FiUser className="h-6 w-6 text-green-600" />
-                </div>
-                <span className="text-sm font-medium text-gray-500">
-                  Profile Completion
-                </span>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-3xl font-bold text-gray-900">
-                    {profileCompletion}%
-                  </h3>
-                </div>
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-2 bg-green-500 rounded-full transition-all duration-500"
-                    style={{ width: `${profileCompletion}%` }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Notifications */}
-            <div className="p-6 hover:border-yellow-500 transition-colors border border-gray-200 rounded-xl">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-yellow-100 rounded-lg">
-                  <FiBell className="h-6 w-6 text-yellow-600" />
-                </div>
-                <span className="text-sm font-medium text-gray-500">
-                  Notifications
-                </span>
-              </div>
-              <div className="flex items-end justify-between">
-                <h3 className="text-3xl font-bold text-gray-900">10</h3>
-                <span className="text-yellow-500 text-sm font-medium">
-                  New updates
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Row Two: 5 Achievement Categories */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-6">
-            <Stat
-              label="Certificates"
-              value={
-                <CountUp
-                  start={0}
-                  end={profile.achievements.total_number_of_certificates || 0}
-                  duration={2}
-                />
-              }
-            />
-            <Stat
-              label="Internships"
-              value={profile.achievements.total_number_of_internships || 0}
-            />
-            <Stat
-              label="Projects"
-              value={profile.achievements.total_number_of_projects || 0}
-            />
-            <Stat
-              label="Online Courses"
-              value={profile.achievements.total_number_of_online_courses || 0}
-            />
-            <Stat
-              label="Hackathons"
-              value={profile.achievements.total_number_of_hackathons || 0}
-            />
-          </div>
-        </div>
+        <ProfileHeader
+          profile={profile}
+          socialLinks={socialLinks}
+          onEditProfile={() => setShowEditProfileModal(true)}
+          onUpdatePassword={() => setShowUpdatePasswordModal(true)}
+        />
+        <StatsSection profile={profile} profileCompletion={profileCompletion} />
 
         {/* Achievements Tabs */}
         <div className="bg-white p-8 rounded-2xl shadow-xl mt-10">
@@ -312,10 +222,35 @@ function Profile() {
           </Tabs.Root>
         </div>
       </div>
+
+      {/* Modal for Edit Profile */}
+      <Modal
+        isOpen={showEditProfileModal}
+        onClose={() => setShowEditProfileModal(false)}
+      >
+        <EditProfile
+          profile={profile}
+          onClose={() => setShowEditProfileModal(false)}
+          // Optionally pass an onSave callback to update profile data after successful edit.
+          onSave={(updatedProfile) => {
+            setProfile(updatedProfile);
+            setShowEditProfileModal(false);
+          }}
+        />
+      </Modal>
+
+      {/* Modal for Update Password */}
+      <Modal
+        isOpen={showUpdatePasswordModal}
+        onClose={() => setShowUpdatePasswordModal(false)}
+      >
+        <ConfirmPassword onClose={() => setShowUpdatePasswordModal(false)} />
+      </Modal>
     </div>
   );
 }
 
+// A simple Stat subcomponent used in StatsSection
 function Stat({ label, value, extra }) {
   return (
     <div className="flex flex-col items-center justify-center p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-sm">

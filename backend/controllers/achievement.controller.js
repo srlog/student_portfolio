@@ -4,26 +4,15 @@ require("dotenv").config();
 
 const createAchievement = async (req, res) => {
   try {
-    const {
-      name,
-      description,
-      type,
-      title,
-      specialization,
-      issued_by,
-      issued_date,
-    } = req.body;
-    const { id: student_id } = req.user; // Assuming you have a way to get the logged-in admin's ID
+    const { type, student_id, title, specialization, issued_by, issued_date } = req.body;
 
     const achievement = await Achievement.create({
-      name,
-      description,
       type,
+      student_id,
       title,
       specialization,
       issued_by,
       issued_date,
-      student_id,
     });
 
     res

@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FiMail, FiLock, FiBook } from 'react-icons/fi';
 import studentAPI from '../../services/student.api.service';
+import adminAPI from '../../services/admin.api.service';
+import masterAPI from '../../services/master.api.service';
 
 function Login() {
   const navigate = useNavigate();
@@ -49,6 +51,7 @@ function Login() {
       toast.success('Welcome to MSEC!');
       navigate(`/${formData.role}/dashboard`);
     } catch (error) {
+      console.log(error)
       toast.error(error.response?.data?.message || 'Login failed');
     } finally {
       setIsLoading(false);

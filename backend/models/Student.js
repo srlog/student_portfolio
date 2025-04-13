@@ -95,6 +95,21 @@ const Student = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    // Portfolio
+    portfolio: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    // GitHub profile link
+    github_profile: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    // LinkedIn profile link
+    linkedin_profile: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
     // URL to the profile picture
     profile_picture: {
       type: DataTypes.STRING(255),
