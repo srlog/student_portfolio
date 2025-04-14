@@ -14,7 +14,7 @@ const ProfileHeader = ({ profile, socialLinks, onEditProfile, onUpdatePassword }
         <div className="w-full lg:w-3/4 flex flex-col sm:flex-row items-center gap-8">
           <div className="relative group">
             <img
-              src={profile.profile_picture}
+              src={student.profile_picture || "/assets/images/avatar.jpg"}
               alt={profile.name}
               className="h-40 w-40 rounded-full border-4 border-white shadow-xl object-cover transition-transform duration-300 transform group-hover:scale-110"
             />

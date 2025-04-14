@@ -151,7 +151,7 @@ function StudentList() {
                       />
                     ) : (
                       <img
-                        src={student.profile_picture}
+                        src={student.profile_picture || "/assets/images/avatar.jpg"}
                         alt={student.name}
                         className="w-full h-full object-cover"
                       />
@@ -223,7 +223,7 @@ function StudentList() {
                     <div className="w-24 h-24 m-3 rounded-full overflow-hidden bg-gray-300 flex-shrink-0">
                       {student.profile_picture ? (
                         <img
-                          src={student.profile_picture}
+                          src={student.profile_picture || "/assets/images/avatar.jpg"}
                           alt={student.name}
                           className="w-full h-full object-cover"
                         />

@@ -150,7 +150,7 @@ function StudentList() {
                       />
                     ) : (
                       <img
-                        src={student.profile_picture}
+                        src={student.profile_picture || "/assets/images/avatar.jpg"}
                         alt={student.name}
                         className="w-full h-full object-cover"
                       />
