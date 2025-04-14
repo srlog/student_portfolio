@@ -10,6 +10,7 @@ function Register() {
     email: '',
     password: '',
     confirmPassword: '',
+    reg_no: '',
     department: '',
     year: '',
   });
@@ -38,12 +39,12 @@ function Register() {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white shadow-lg rounded-lg">
+      <div className="max-w-2xl w-full space-y-8 p-8 bg-white shadow-lg rounded-lg">
         <div>
           <h2 className="text-center text-3xl font-bold text-gray-900">Register</h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="name" className="text-gray-700">Name</label>
               <input
@@ -89,15 +90,34 @@ function Register() {
               />
             </div>
             <div>
-              <label htmlFor="department" className="text-gray-700">Department</label>
+              <label htmlFor="reg_no" className="text-gray-700">Registration Number</label>
               <input
-                id="department"
+                id="reg_no"
                 type="text"
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                value={formData.reg_no}
+                onChange={(e) => setFormData({...formData, reg_no: e.target.value})}
+              />
+            </div>
+            <div>
+              <label htmlFor="department" className="text-gray-700">Department</label>
+              <select
+                id="department"
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 value={formData.department}
                 onChange={(e) => setFormData({...formData, department: e.target.value})}
-              />
+              >
+                <option value="">Select Department</option>
+                <option value="AI&DS">AI&DS</option>
+                <option value="CIVIL">CIVIL</option>
+                <option value="CSE">CSE</option>
+                <option value="EEE">EEE</option>
+                <option value="ECE">ECE</option>
+                <option value="IT">IT</option>
+                <option value="MECH">MECH</option>
+              </select>
             </div>
             <div>
               <label htmlFor="year" className="text-gray-700">Year</label>
@@ -109,10 +129,10 @@ function Register() {
                 onChange={(e) => setFormData({...formData, year: e.target.value})}
               >
                 <option value="">Select Year</option>
-                <option value="1">First Year</option>
-                <option value="2">Second Year</option>
-                <option value="3">Third Year</option>
-                <option value="4">Fourth Year</option>
+                <option value="I">First Year</option>
+                <option value="II">Second Year</option>
+                <option value="III">Third Year</option>
+                <option value="IV">Fourth Year</option>
               </select>
             </div>
           </div>
@@ -129,3 +149,4 @@ function Register() {
 }
 
 export default Register;
+

@@ -71,6 +71,7 @@ const sameDept = async (req, res, next) => {
     });
   }
   if (req.user.role !== "master" && req.user.department !== req.params.department) {
+    console.log(req.user)
     return res.status(403).json({
       message: "Access denied. Admin or owner only.",
       currentRole: req.user ? req.user.role : "none",

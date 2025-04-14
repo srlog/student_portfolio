@@ -50,7 +50,7 @@ const masterLogin = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: Master.id, name: master.name, email: master.email, role: "master" },
+      { id: master.id, name: master.name, email: master.email, role: "master" },
       process.env.JWT_SECRET,
       { expiresIn: "10d" }
     );

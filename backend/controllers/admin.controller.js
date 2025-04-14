@@ -66,13 +66,14 @@ const adminLogin = async (req, res) => {
 
 const adminUpdatePassword = async (req, res) => {
   try {
-    const { email, currentPassword, newPassword } = req.body;
+    console.log(req.body)
+    const { email, oldPassword, newPassword } = req.body;
     const admin = await Admin.findOne({ where: { email } });
     if (!admin) {
       return res.status(404).json({ message: "Admin not found" });
     }
 
-    const passwordMatch = await bcrypt.compare(currentPassword, admin.password);
+    const passwordMatch = await bcrypt.compare(oldPassword, admin.password);
     if (!passwordMatch) {
       return res.status(401).json({ message: "Invalid password" });
     }

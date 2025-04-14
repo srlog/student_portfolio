@@ -1,5 +1,7 @@
-const { Admin, Student, Achievement } = require("../models");
+const { where } = require("sequelize");
+const { Admin, Student, Achievement, Master } = require("../models");
 const { organizeAchievementsStudent } = require("./achievement.controller");
+const { Op, literal } = require("sequelize");
 
 const getStudentProfile = async (req, res) => {
   try {
@@ -54,8 +56,118 @@ const getAdminProfile = async (req, res) => {
         id: req.user.id,
       },
     });
+
+    const students = await Student.findAll({
+      where: {
+        department: admin.department,
+      },
+      attributes: ["id", "name", "year", "section", "reg_no", "email", "profile_picture"],
+      include: [
+        {
+          model: Achievement,
+          as: "studentAchievements",
+        },
+      ],
+    });
+
+    const not_approved_achievements = await Achievement.findAll({
+      order: [['issued_date', 'DESC']],
+      where : {
+        approved_by_department: false
+      },
+      include: [
+        {
+          model: Student,
+          as: "achievementStudent",
+          attributes: ["id", "name", "email", "department"],
+          where: { department : admin.department }, // you might pass `department` as a variable from req.params or similar
+        },
+      ],
+    });
+    
+    var all_achievements = 0;
+
+    students.forEach((student) => {
+      student.dataValues.total_achievements = student.studentAchievements.length;
+      all_achievements += student.studentAchievements.length;
+    });
+    
+    students.sort((a, b) => b.dataValues.total_achievements - a.dataValues.total_achievements);
+    
+    
+    admin.dataValues.achievements = all_achievements;
+    admin.dataValues.not_approved_achievements = not_approved_achievements.length;
+    admin.dataValues.approved_achievements = all_achievements - not_approved_achievements.length;
+    const top_students = students.slice(0,5);
+    const recent_achievements = not_approved_achievements.slice(0,5);
+
     res.status(200).json({
       admin,
+      top_students,
+      recent_achievements
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+const getMasterProfile = async (req, res) => {
+  try {
+    const master = await Master.findOne({
+      where: {
+        id: req.user.id,
+      },
+    });
+
+    const students = await Student.findAll({
+      attributes: ["id", "name", "year","department", "section", "reg_no", "email", "profile_picture"],
+      include: [
+        {
+          model: Achievement,
+          as: "studentAchievements",
+        },
+      ],
+    });
+
+    const not_approved_achievements = await Achievement.findAll({
+      order: [['issued_date', 'DESC']],
+      where : {
+        [Op.or]: [
+          { approved_by_department: false },
+          { approved_by_placement: false },
+        ],
+      },
+      include: [
+        {
+          model: Student,
+          as: "achievementStudent",
+          attributes: ["id", "name", "email", "department"],
+         },
+      ],
+    });
+    
+    var all_achievements = 0;
+
+    students.forEach((student) => {
+      student.dataValues.total_achievements = student.studentAchievements.length;
+      all_achievements += student.studentAchievements.length;
+    });
+    
+    students.sort((a, b) => b.dataValues.total_achievements - a.dataValues.total_achievements);
+    
+    
+    master.dataValues.achievements = all_achievements;
+    master.dataValues.not_approved_achievements = not_approved_achievements.length;
+    master.dataValues.approved_achievements = all_achievements - not_approved_achievements.length;
+    const top_students = students.slice(0,20);
+    const recent_achievements = not_approved_achievements.slice(0,20);
+
+    res.status(200).json({
+      master,
+      top_students,
+      recent_achievements
     });
   } catch (error) {
     console.error(error);
@@ -146,6 +258,7 @@ module.exports = {
   getStudentProfile,
   getStudentProfileAdmin,
   getAdminProfile,
+  getMasterProfile,
   updateStudentProfile,
   updateAdminProfile,
 };

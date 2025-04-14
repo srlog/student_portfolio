@@ -40,7 +40,7 @@ const calculateWeeklyStreak = (achievementDates) => {
   for (let i = 0; i < weekStarts.length; i++) {
     const currentWeek = new Date(weekStarts[i]);
     const nextExpectedWeek = addDays(currentWeek, 7);
-    const thisWeekFull = weekMap[weekStarts[i]].size === 1;
+    const thisWeekFull = weekMap[weekStarts[i]].size >= 2 ;
 
     if (!thisWeekFull) {
       currentStreak = 0;

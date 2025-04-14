@@ -1,16 +1,14 @@
-import { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
-import achievementAPI from '../../services/achievement.api.service';
-import Navbar from '../../components/Layout/Navbar';
+import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import achievementAPI from "../../services/achievement.api.service";
+import Navbar from "../../components/Layout/Navbar";
 
 function Approvals() {
   const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState('pending');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [yearFilter, setYearFilter] = useState('all');
-
-  const department = JSON.parse(localStorage.getItem('user')).department;
+  const [statusFilter, setStatusFilter] = useState("pending");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [yearFilter, setYearFilter] = useState("all");
 
   useEffect(() => {
     loadAchievements();
@@ -18,10 +16,11 @@ function Approvals() {
 
   const loadAchievements = async () => {
     try {
-      const response = await achievementAPI.getByDepartment(department);
-      setAchievements(response.data);
+      const response = await achievementAPI.getAll();
+      console.log(response.data);
+      setAchievements(response.data.achievements);
     } catch (error) {
-      toast.error('Failed to load achievements');
+      toast.error("Failed to load achievements");
     } finally {
       setLoading(false);
     }
@@ -29,21 +28,21 @@ function Approvals() {
 
   const handleApprove = async (id) => {
     try {
-      await achievementAPI.approve(id, { approved_by_department: true });
-      toast.success('Achievement approved successfully');
+      await achievementAPI.approve(id, { approved_by_placement: true });
+      toast.success("Achievement approved successfully");
       loadAchievements();
     } catch (error) {
-      toast.error('Failed to approve achievement');
+      toast.error("Failed to approve achievement");
     }
   };
 
   const handleReject = async (id) => {
     try {
       await achievementAPI.reject(id);
-      toast.success('Achievement rejected successfully');
+      toast.success("Achievement rejected successfully");
       loadAchievements();
     } catch (error) {
-      toast.error('Failed to reject achievement');
+      toast.error("Failed to reject achievement");
     }
   };
 
@@ -51,26 +50,30 @@ function Approvals() {
     const student = achievement.achievementStudent || {};
 
     const statusCondition =
-      statusFilter === 'all' ||
-      (statusFilter === 'approved' && achievement.approved_by_department) ||
-      (statusFilter === 'pending' && !achievement.approved_by_department);
+      statusFilter === "all" ||
+      (statusFilter === "approved" && achievement.approved_by_placement) ||
+      (statusFilter === "pending" && !achievement.approved_by_placement);
 
     const lowerSearch = searchTerm.toLowerCase();
     const searchCondition =
       student.name?.toLowerCase().includes(lowerSearch) ||
       student.reg_no?.toLowerCase().includes(lowerSearch);
 
-    const yearCondition = yearFilter === 'all' || student.year === yearFilter;
+    const yearCondition = yearFilter === "all" || student.year === yearFilter;
 
     return statusCondition && searchCondition && yearCondition;
   });
+  const name = JSON.parse(localStorage.getItem("user"))?.name;
+  
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar role="admin" />
+        <Navbar role="master" name />
         <div className="container mx-auto px-4 py-16">
-          <div className="text-center text-lg font-medium text-gray-700">Loading...</div>
+          <div className="text-center text-lg font-medium text-gray-700">
+            Loading...
+          </div>
         </div>
       </div>
     );
@@ -78,10 +81,10 @@ function Approvals() {
 
   return (
     <div className="min-h-screen   bg-gray-50">
-      <Navbar role="admin" />
+      <Navbar role="master" name={name} />
       <div className="container max-w-7xl mx-auto px-4 py-8">
         <h1 className="text-4xl font-extrabold text-gray-800 mb-8 text-center sm:text-left">
-          Achievement Approvals
+          Achievement Approval
         </h1>
 
         <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -145,28 +148,33 @@ function Approvals() {
                   {achievement.title}
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  {achievement.specialization || 'No specialization available'}
+                  {achievement.specialization || "No specialization available"}
                 </p>
                 <div className="space-y-1 mb-4">
                   <p className="text-sm text-gray-500">
-                    <span className="font-medium">Student:</span> {achievement.achievementStudent?.name || 'N/A'}
+                    <span className="font-medium">Student:</span>{" "}
+                    {achievement.achievementStudent?.name || "N/A"}
                   </p>
                   <p className="text-sm text-gray-500">
-                    <span className="font-medium">Reg No:</span> {achievement.achievementStudent?.reg_no || 'N/A'}
+                    <span className="font-medium">Reg No:</span>{" "}
+                    {achievement.achievementStudent?.reg_no || "N/A"}
                   </p>
                   <p className="text-sm text-gray-500">
-                    <span className="font-medium">Year:</span> {achievement.achievementStudent?.year || 'N/A'}
+                    <span className="font-medium">Year:</span>{" "}
+                    {achievement.achievementStudent?.year || "N/A"}
                   </p>
                   <p className="text-sm text-gray-500">
-                    <span className="font-medium">Date:</span> {new Date(achievement.issued_date).toLocaleDateString()}
+                    <span className="font-medium">Date:</span>{" "}
+                    {new Date(achievement.issued_date).toLocaleDateString()}
                   </p>
                   <p className="text-sm text-gray-500">
-                    <span className="font-medium">Type:</span> {achievement.type}
+                    <span className="font-medium">Type:</span>{" "}
+                    {achievement.type}
                   </p>
                 </div>
               </div>
               <div className="flex justify-end space-x-2 mt-4">
-                {achievement.approved_by_department ? (
+                {achievement.approved_by_placement ? (
                   <button
                     onClick={() => handleReject(achievement.id)}
                     className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-md transition duration-200"
@@ -197,4 +205,3 @@ function Approvals() {
 }
 
 export default Approvals;
-

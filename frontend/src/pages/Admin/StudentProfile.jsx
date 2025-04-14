@@ -1,66 +1,26 @@
 import { useState, useEffect } from "react";
-import CountUp from "react-countup";
+import { useParams } from 'react-router-dom';
 import { toast } from "react-toastify";
-import studentAPI from "../../services/student.api.service";
+import adminApi from "../../services/admin.api.service";
 import Navbar from "../../components/Layout/Navbar";
-import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import * as Tabs from "@radix-ui/react-tabs";
 import "react-circular-progressbar/dist/styles.css";
-import ReactMarkdown from "react-markdown";
 import {
   GlobeAltIcon,
   EnvelopeIcon,
   PhoneIcon,
 } from "@heroicons/react/24/outline";
-import { FaLinkedin, FaGithub, FaGit } from 'react-icons/fa';
-import { FiAward, FiUser, FiBell } from "react-icons/fi";
+import { FaLinkedin, FaGithub, FaGit } from "react-icons/fa";
 
-// Import your modal forms
-import { ConfirmPassword, EditProfile } from "./EditProfile";
 import ProfileHeader from "./ProfileHeader";
-import {StatsSection} from "./StatsSection";
-
-// A reusable Modal component
-const Modal = ({ isOpen, onClose, children }) => {
-  if (!isOpen) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-lg p-6">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-6 h-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-        <div className="mt-2">{children}</div>
-      </div>
-    </div>
-  );
-};
-
+import { StatsSection } from "../Student/StatsSection";
 
 function Profile() {
+  const { studentId } = useParams();
   // Set a default for achievements so it never is undefined.
   const [profile, setProfile] = useState({ achievements: {} });
   const [activeTab, setActiveTab] = useState("achievements");
   const [loading, setLoading] = useState(true);
-
-  // Modal states
-  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
-  const [showUpdatePasswordModal, setShowUpdatePasswordModal] = useState(false);
 
   // Calculate profile completion as percentage of mandatory fields present.
   function calculateProfileCompletion(profileData) {
@@ -93,13 +53,14 @@ function Profile() {
     return Math.round((filled / requiredFields.length) * 100);
   }
 
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await studentAPI.getProfile();
+        const response = await adminApi.getStudentProfile(studentId);
         // Ensure achievements is present. If not, fallback to an empty object.
         const data = { ...response.data.student };
-        console
+
         setProfile(data);
       } catch (error) {
         toast.error("Failed to fetch profile");
@@ -108,7 +69,6 @@ function Profile() {
       }
     };
     fetchProfile();
-    
   }, []);
 
   if (loading) {
@@ -131,7 +91,8 @@ function Profile() {
       icon: <PhoneIcon className="h-5 w-5" />,
       label: profile.mobile,
       url: `tel:${profile.mobile}`,
-    },  {
+    },
+    {
       isPresent: !!profile.portfolio,
       icon: <GlobeAltIcon className="h-5 w-5" />,
       url: profile.portfolio,
@@ -146,9 +107,7 @@ function Profile() {
       icon: <FaLinkedin className="h-5 w-5" />,
       url: profile.linkedin_profile,
     },
-  
   ];
-
 
   const renderAchievements = (category) => (
     <div className="mt-6" key={category}>
@@ -195,7 +154,7 @@ function Profile() {
   );
 
   // Calculate profile completion once profile data is loaded.
-  const profileCompletion = calculateProfileCompletion();
+  const profileCompletion = calculateProfileCompletion(profile);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -204,8 +163,6 @@ function Profile() {
         <ProfileHeader
           profile={profile}
           socialLinks={socialLinks}
-          onEditProfile={() => setShowEditProfileModal(true)}
-          onUpdatePassword={() => setShowUpdatePasswordModal(true)}
         />
         <StatsSection profile={profile} profileCompletion={profileCompletion} />
 
@@ -233,29 +190,7 @@ function Profile() {
         </div>
       </div>
 
-      {/* Modal for Edit Profile */}
-      <Modal
-        isOpen={showEditProfileModal}
-        onClose={() => setShowEditProfileModal(false)}
-      >
-        <EditProfile
-          profile={profile}
-          onClose={() => setShowEditProfileModal(false)}
-          // Optionally pass an onSave callback to update profile data after successful edit.
-          onSave={(updatedProfile) => {
-            setProfile(updatedProfile);
-            setShowEditProfileModal(false);
-          }}
-        />
-      </Modal>
-
-      {/* Modal for Update Password */}
-      <Modal
-        isOpen={showUpdatePasswordModal}
-        onClose={() => setShowUpdatePasswordModal(false)}
-      >
-        <ConfirmPassword onClose={() => setShowUpdatePasswordModal(false)} />
-      </Modal>
+ 
     </div>
   );
 }

@@ -32,6 +32,12 @@ router.patch(
   isAdmin,
   achievementController.approveAchievement
 );
+router.patch(
+  "/reject/:id",
+  auth,
+  isAdmin,
+  achievementController.rejectAchievement
+)
 router.get(
   "/get/:id",
   auth,
@@ -48,8 +54,13 @@ router.get(
   "/get/department/:department",
   auth,
   isAdmin,
-  sameDept,
   achievementController.getAchievementsByDepartment
+);
+router.get(
+  "/get/students/:department",
+  auth,
+  isAdmin,
+  achievementController.getStudentsByDepartment
 );
 
 router.get(
@@ -65,5 +76,7 @@ router.get(
   achievementController.getAchievementsByClass
 );
 router.get("/getAll",auth, isMaster, achievementController.getAllAchievements);
+
+router.get("/get/all/students",auth, isMaster, achievementController.getAllStudents);
 
 module.exports = router;

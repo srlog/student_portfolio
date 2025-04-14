@@ -1,4 +1,4 @@
-const { Student } = require("../models");
+const { Student, Achievement } = require("../models");
 
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -36,6 +36,17 @@ const studentRegister = async (req, res) => {
       email,
       password: hashedPassword,
     });
+    const achievement = await Achievement.create({
+      "type": "certificate",
+      "student_id": student.id,
+      "title": "Rising Star",
+      "specialization": "Upscaling",
+      "issued_by": "MS-CIIC",
+      "issued_date": "2025-04-15T00:00:00.000Z",
+      "approved_by_placement": true,
+      "approved_by_department": true
+    });
+
     res
       .status(201)
       .json({ message: "Student registered successfully", student });

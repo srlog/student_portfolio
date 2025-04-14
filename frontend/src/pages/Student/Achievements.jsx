@@ -6,52 +6,15 @@ import achievementAPI from "../../services/achievement.api.service";
 import Navbar from "../../components/Layout/Navbar";
 import * as Tabs from "@radix-ui/react-tabs";
 
-import AchievementCalendarContainer from "./AchievementCalendarContainer";
-function Stat({ label, value, extra }) {
-  return (
-    <div className="flex flex-col items-center justify-center p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-sm">
-      <span className="text-sm font-medium text-gray-600">{label}</span>
-      {extra ? (
-        <div className="w-16 h-16 mt-2">{extra}</div>
-      ) : (
-        <span className="text-3xl font-bold text-gray-800 mt-2">{value}</span>
-      )}
-    </div>
-  );
-}
+import Celebration from "../../components/Celebration";
 
+import AchievementCalendarContainer from "./AchievementCalendarContainer";
+
+import { Stat } from "./StatsSection";
 // ------------------------------------------
 // Reusable Modal Component
 // ------------------------------------------
-const Modal = ({ isOpen, onClose, children }) => {
-  if (!isOpen) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-lg p-6">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-6 h-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-        <div className="mt-2">{children}</div>
-      </div>
-    </div>
-  );
-};
+import Modal from "../../components/Modal";
 
 // ------------------------------------------
 // Achievement Form Component (for Create/Edit)
@@ -100,7 +63,9 @@ const AchievementForm = ({
           className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
           required
         >
-          <option value="">Select Type</option>
+          <option value="" disabled>
+            Select Type
+          </option>
           <option value="certificate">Certificate</option>
           <option value="online_course">Online Course</option>
           <option value="project">Project</option>
@@ -174,6 +139,22 @@ const AchievementForm = ({
           required
         />
       </div>
+      <div className="flex items-center space-x-2 mt-4">
+        <input
+          type="checkbox"
+          id="hard_copy_submitted"
+          name="hard_copy_submitted"
+          className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          required
+        />
+        <label
+          htmlFor="hard_copy_submitted"
+          className="text-gray-700 font-medium"
+        >
+          HardCopy submitted to Placement Cell
+        </label>
+      </div>
+
       <div className="flex justify-end space-x-4 mt-6">
         <button
           type="button"
@@ -196,9 +177,6 @@ const AchievementForm = ({
 // ------------------------------------------
 // Main Achievements Component
 // ------------------------------------------
-// ------------------------------------------
-// Main Achievements Component
-// ------------------------------------------
 
 function Achievements() {
   const [profile, setProfile] = useState({});
@@ -207,6 +185,8 @@ function Achievements() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingAchievement, setEditingAchievement] = useState(null);
+
+  const [isCelebrating, setIsCelebrating] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -233,7 +213,13 @@ function Achievements() {
     try {
       await achievementAPI.create(data);
       toast.success("Achievement created successfully!");
+
+      // Trigger the celebration effect
+      setIsCelebrating(true);
+
+      // Loads the profiel on the meantime
       loadProfile();
+      setTimeout(() => setIsCelebrating(false), 5000);
     } catch (error) {
       toast.error("Failed to create achievement");
       console.error(error);
@@ -345,6 +331,11 @@ function Achievements() {
   return (
     <div className="min-h-screen bg-white">
       <Navbar role="student" />
+      {isCelebrating && (
+        <div style={{ position: "absolute", zIndex: "10" }}>
+          <Celebration />
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto p-3 ">
         {/* Add Achievement Button */}

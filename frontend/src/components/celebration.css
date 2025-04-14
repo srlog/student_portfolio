@@ -1,0 +1,41 @@
+@keyframes glow {
+    0% {
+      text-shadow: 0 0 15px rgb(0, 0, 255);
+      transform: translate(-50%, -50%) scale(1);
+      
+    }
+    100% {
+      text-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+      transform: translate(-50%, -50%) scale(1.3);
+    }
+  }
+
+  @keyframes scaleDown {
+    0% {
+      transform: translate(-50%, -50%) scale(2);
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+
+  .glow-text {
+    text-align: center;
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: black;
+    font-size: 2rem;
+    font-weight: bold;
+    color: black;
+
+    animation: glow 1s infinite alternate;
+  }
+
+  .cup-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    animation: scaleDown 1s infinite alternate;
+  }

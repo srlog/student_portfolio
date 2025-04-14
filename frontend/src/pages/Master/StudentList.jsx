@@ -35,7 +35,7 @@ function StudentList() {
 
   const fetchStudents = async () => {
     try {
-      const response = await achievementAPI.getStudentsList();
+      const response = await achievementAPI.getStudentsListMaster();
       console.log(response.data);
       setStudents(response.data);
     } catch (error) {
@@ -93,7 +93,6 @@ function StudentList() {
                 setFilters({ ...filters, search: e.target.value })
               }
             />
-            {/*  Since the admin can access only the students form his department
             <select
               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               value={filters.department}
@@ -109,7 +108,7 @@ function StudentList() {
               <option value="ECE">ECE</option>
               <option value="IT">IT</option>
               <option value="MECH">MECH</option> 
-            </select> */}
+            </select>
             <select
               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               value={filters.year}
@@ -121,7 +120,7 @@ function StudentList() {
               <option value="3">Third Year</option>
               <option value="4">Fourth Year</option>
             </select>
-            <select
+            {/* <select
               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               value={filters.section}
               onChange={(e) => setFilters({ ...filters, year: e.target.value })}
@@ -129,7 +128,7 @@ function StudentList() {
               <option value="">All Section</option>
               <option value="A">A</option>
               <option value="B">B</option>
-            </select>
+            </select> */}
           </div>
         </div>
 

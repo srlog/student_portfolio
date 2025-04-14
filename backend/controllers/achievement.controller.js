@@ -111,7 +111,7 @@ const groupAchievementsByStudent = (achievements) => {
     }
     const student = studentInstance.get();
     const studentId = student.id;
-    
+        
     if (!grouped[studentId]) {
       grouped[studentId] = {
         student: {
@@ -119,6 +119,9 @@ const groupAchievementsByStudent = (achievements) => {
           name: student.name,
           email: student.email,
           department: student.department,
+          year: student.year,
+          reg_no: student.reg_no,
+          profile_picture: student.profile_picture,
         },
         achievements: [],
       };
@@ -135,7 +138,7 @@ const groupAchievementsByStudent = (achievements) => {
 
   const result = Object.values(grouped).map((group) => {
     const organised = organizeAchievementsStudent(group.achievements);
-    console.log(organised)
+    // console.log(organised)
     
 
     total += group.achievements.length;
@@ -181,7 +184,7 @@ const approveAchievement = async (req, res) => {
       return res.status(404).json({ message: "Achievement not found" });
     }
 
-    if (req.user.name === "Placement_cell") {
+    if (req.user.role === "master") {
       await achievement.update({ approved_by_placement: true });
       res.status(200).json({
         message: "Achievement approved by placement cell",
@@ -199,6 +202,37 @@ const approveAchievement = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+const rejectAchievement = async (req, res) => {
+  try {
+    const { id: achievement_id } = req.params;
+    if (req.user.role !== "admin" && req.user.role !== "master") {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    const achievement = await Achievement.findByPk(achievement_id);
+    if (!achievement) {
+      return res.status(404).json({ message: "Achievement not found" });
+    }
+
+    if (req.user.role === "master") {
+      await achievement.update({ approved_by_placement: false });
+      res.status(200).json({
+        message: "Achievement rejected by placement cell",
+        achievement,
+      });
+    } else {
+      await achievement.update({ approved_by_department: false });
+      res.status(200).json({
+        message: "Achievement rejected by admin",
+        achievement,
+      });
+    }
+  } catch (error) {
+    console.error("Error in rejecting achievement:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 
 const getAcheivementById = async (req, res) => {
   try {
@@ -249,8 +283,64 @@ const getAchievementsByDepartment = async (req, res) => {
         {
           model: Student,
           as: "achievementStudent",
-          attributes: ["id", "name", "email", "department"],
+          attributes: ["id", "name", "email", "department", "year","reg_no"],
           where: { department }, // you might pass `department` as a variable from req.params or similar
+        },
+      ],
+    });
+
+    if (!achievements || achievements.length === 0) {
+      return res.status(404).json({ message: "Achievements not found" });
+    }
+    const result = groupAchievementsByStudent(achievements);
+
+    res.status(200).json(achievements);
+  } catch (error) {
+    console.error(
+      "Error fetching or organizing achievements by department:",
+      error
+    );
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+const getStudentsByDepartment = async (req, res) => {
+  try {
+    const { department } = req.params;
+    // Fetch achievements joined with Students data
+    const achievements = await Achievement.findAll({
+      include: [
+        {
+          model: Student,
+          as: "achievementStudent",
+          attributes: ["id", "name", "email", "department", "year","reg_no", "profile_picture"],
+          where: { department }, // you might pass `department` as a variable from req.params or similar
+        },
+      ],
+    });
+
+    if (!achievements || achievements.length === 0) {
+      return res.status(404).json({ message: "Achievements not found" });
+    }
+    const result = groupAchievementsByStudent(achievements);
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error(
+      "Error fetching or organizing achievements by department:",
+      error
+    );
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+const getAllStudents = async (req, res) => {
+  try {
+    const achievements = await Achievement.findAll({
+      include: [
+        {
+          model: Student,
+          as: "achievementStudent",
+          attributes: ["id", "name", "email", "department", "year","reg_no", "profile_picture"],
+          // where: { department }, // you might pass `department` as a variable from req.params or similar
         },
       ],
     });
@@ -334,16 +424,16 @@ const getAllAchievements = async (req, res) => {
       include: [
         {
           model: Student,
-          attributes: ["name", "email"],
+          attributes: ["name", "email","reg_no","department","year"],
           as: "achievementStudent",
         },
       ],
     });
-    const result = groupAchievementsByStudent(achievements);
+    // const result = groupAchievementsByStudent(achievements);
 
     res
       .status(200)
-      .json({ message: "Achievements fetched successfully", result });
+      .json({ message: "Achievements fetched successfully", achievements });
   } catch (error) {
     console.error("Error in fetching achievements:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -355,11 +445,14 @@ module.exports = {
   updateAchievement,
   deleteAchievement,
   approveAchievement,
+  rejectAchievement,
   getAcheivementById,
   getAcheivementByStudentId,
   getAchievementsByDepartment,
   getAchievementsByYear,
   getAchievementsByClass,
+  getAllStudents,
   getAllAchievements,
-  organizeAchievementsStudent
+  organizeAchievementsStudent,
+  getStudentsByDepartment
 };

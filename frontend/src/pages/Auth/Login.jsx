@@ -41,7 +41,7 @@ function Login() {
         default:
           throw new Error('Invalid role');
       }
-
+      console.log(response.data);
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify({
         ...response.data.user,

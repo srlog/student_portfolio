@@ -74,6 +74,20 @@ function Dashboard() {
         const response = await studentAPI.getProfile();
         if (response.data && response.data.student) {
           const data = { ...response.data.student };
+          console.log(data)
+          const all_achievements = [];
+          all_achievements.push(...data.achievements.certificates);
+          all_achievements.push(...data.achievements.projects);
+          all_achievements.push(...data.achievements.online_courses);
+          all_achievements.push(...data.achievements.hackathons);
+          all_achievements.push(...data.achievements.paper_presentations);
+          all_achievements.push(...data.achievements.internships);
+          all_achievements.sort((a, b) => new Date(b.issued_date) - new Date(a.issued_date));
+          const non_approved_achivements = all_achievements.filter(
+            (achievement) =>
+              (!achievement.approved_by_department ||
+                !achievement.approved_by_placement)
+          );
 
           // Here, assume the backend returns fields like:
           // data.total_achievements, data.notifications and profile achievements counts
@@ -81,7 +95,7 @@ function Dashboard() {
             totalAchievements: data.achievements.total_achievements || 0,
             profileCompletion: calculateProfileCompletion(data),
             notifications: data.notifications || 0,
-            recentAchievements: data.recentAchievements || [],
+            recentAchievements: non_approved_achivements || [],
             achievements: {
               total_number_of_certificates:
                 data.achievements.total_number_of_certificates || 0,
@@ -126,11 +140,20 @@ function Dashboard() {
       profileData.cgpa,
       profileData.bio,
       profileData.profile_picture,
+      profileData.linkedin_profile,
+      profileData.portfolio,
+      profileData.github_profile,
+      profileData.achievements.certificates,
+      profileData.achievements.online_courses,
+      profileData.achievements.paper_presentations,
+      profileData.achievements.internships,
+      profileData.achievements.projects,
+      profileData.achievements.hackathons,
+
     ];
-    const filled = requiredFields.filter((field) => field).length;
+    const filled = requiredFields.filter((field) => field != null).length;
     return Math.round((filled / requiredFields.length) * 100);
   }
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-200">
@@ -306,45 +329,7 @@ function Dashboard() {
             }
           />
         </div>
-
-        {/* Recent Achievements and Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          <div className="card p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Recent Achievements
-              </h2>
-              <Link
-                to="/student/achievements"
-                className="text-primary-600 hover:text-primary-700 text-sm font-medium"
-              >
-                View All
-              </Link>
-            </div>
-            <div className="space-y-4">
-              {stats.recentAchievements.length > 0 ? (
-                stats.recentAchievements.map((achievement) => (
-                  <div
-                    key={achievement.id}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                  >
-                    <div>
-                      <h3 className="font-medium text-gray-900">
-                        {achievement.title}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        {new Date(achievement.date).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <span className="badge badge-info">{achievement.type}</span>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500">No recent achievements</p>
-              )}
-            </div>
-          </div>
-          <div className="card p-6">
+        <div className="card p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-gray-900">
                 Quick Actions
@@ -352,7 +337,7 @@ function Dashboard() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <Link
-                to="/student/achievements/new"
+                to="/student/achievements/"
                 className="p-4 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors group"
               >
                 <h3 className="font-medium text-primary-700 group-hover:text-primary-800">
@@ -375,6 +360,80 @@ function Dashboard() {
               </Link>
             </div>
           </div>
+        {/* Recent Achievements and Quick Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 mt-8">
+          <div className="card p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">
+                 Achievements waiting for Approval
+              </h2>
+              <Link
+                to="/student/achievements"
+                className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+              >
+                View All
+              </Link>
+            </div>
+            <div className="space-y-4">
+              {stats.recentAchievements.length > 0 ? (
+                stats.recentAchievements.map((achievement) => (
+                  <div
+                    key={achievement.id}
+                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <div>
+                      <h3 className="font-medium text-gray-900">
+                        {achievement.title}
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        {new Date(achievement.issued_date).toLocaleDateString()}
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {achievement.description}
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Issued by: {achievement.issued_by}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      
+                    <span className="badge badge-info">{achievement.type}</span>
+                      <span
+                        className={`badge text-center ${
+                          
+                          achievement.approved_by_placement
+                            ? "badge-success"
+                            : "badge-warning"
+                        }`}
+                      >
+                        {
+                        achievement.approved_by_placement
+                          ? "Approved by Placement"
+                          : "Pending for placement "}
+                          
+                      </span>
+                      <span
+                        className={`badge text-center ${
+                          achievement.approved_by_department 
+                            ? "badge-success"
+                            : "badge-warning"
+                        }`}
+                      >
+                        {achievement.approved_by_department
+                          ? "Approved by Department"
+                          : "Pending for Department"}
+                          
+                      </span>
+                      
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500">No recent achievements</p>
+              )}
+            </div>
+          </div>
+         
         </div>
       </div>
     </div>
