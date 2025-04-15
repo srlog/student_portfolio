@@ -195,7 +195,7 @@ function Profile() {
   );
 
   // Calculate profile completion once profile data is loaded.
-  const profileCompletion = calculateProfileCompletion();
+  const profileCompletion = calculateProfileCompletion(profile);
 
   return (
     <div className="min-h-screen bg-gray-50">
